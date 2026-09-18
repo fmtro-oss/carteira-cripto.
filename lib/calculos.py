@@ -11,6 +11,16 @@ import pandas as pd
 TIPOS_AQUISICAO = ("Compra", "Saldo Inicial", "Recompensa")
 
 
+def _divisao_segura(numerador: pd.Series, denominador: pd.Series, offset: float = 0.0) -> pd.Series:
+    """(numerador / denominador) + offset, mas devolve 0 onde o denominador é 0
+    em vez de estourar ZeroDivisionError — acontece sempre que uma posição
+    está totalmente zerada (ex.: um ativo deslistado, custo_posicao = 0)."""
+    resultado = pd.Series(0.0, index=numerador.index)
+    mask = denominador != 0
+    resultado.loc[mask] = numerador.loc[mask] / denominador.loc[mask] + offset
+    return resultado
+
+
 def calcular_posicoes(lanc: pd.DataFrame, precos: pd.DataFrame, config: dict) -> pd.DataFrame:
     if lanc.empty:
         return pd.DataFrame()
@@ -34,7 +44,7 @@ def calcular_posicoes(lanc: pd.DataFrame, precos: pd.DataFrame, config: dict) ->
         qtd_taxa_pura=("qtd_taxa_pura", "sum"),
     )
     g["qtd_atual"] = g["qtd_aquisicao"] - g["qtd_venda"] - g["qtd_taxa_pura"]
-    g["custo_medio"] = (g["custo_aquisicao"] / g["qtd_aquisicao"]).where(g["qtd_aquisicao"] > 0, 0)
+    g["custo_medio"] = _divisao_segura(g["custo_aquisicao"], g["qtd_aquisicao"])
     g["custo_posicao"] = g["qtd_atual"] * g["custo_medio"]
     g["pl_realizado"] = g["receita_venda"] - g["qtd_venda"] * g["custo_medio"]
 
@@ -44,7 +54,7 @@ def calcular_posicoes(lanc: pd.DataFrame, precos: pd.DataFrame, config: dict) ->
 
     g["valor_atual"] = g["qtd_atual"] * g["preco_atual"]
     g["pl_aberto"] = g["valor_atual"] - g["custo_posicao"]
-    g["pl_aberto_pct"] = (g["preco_atual"] / g["custo_medio"] - 1).where(g["custo_medio"] > 0, 0)
+    g["pl_aberto_pct"] = _divisao_segura(g["preco_atual"], g["custo_medio"], offset=-1.0)
 
     cambio = config.get("cambio_usd_brl", 0) or 0
     g["valor_atual_brl"] = g["valor_atual"] * cambio
@@ -79,8 +89,8 @@ def calcular_consolidado(posicoes: pd.DataFrame, config: dict) -> pd.DataFrame:
         valor_atual=("valor_atual", "sum"),
         pl_realizado=("pl_realizado", "sum"),
     )
-    g["custo_medio"] = (g["custo_posicao"] / g["qtd_atual"]).where(g["qtd_atual"] > 0, 0)
-    g["pl_pct"] = (g["valor_atual"] / g["custo_posicao"] - 1).where(g["custo_posicao"] > 0, 0)
+    g["custo_medio"] = _divisao_segura(g["custo_posicao"], g["qtd_atual"])
+    g["pl_pct"] = _divisao_segura(g["valor_atual"], g["custo_posicao"], offset=-1.0)
     patrimonio_total = posicoes["valor_atual"].sum()
     g["pct_carteira"] = g["valor_atual"] / patrimonio_total if patrimonio_total > 0 else 0
     alocacao_max = config.get("alocacao_maxima", 0.15)
@@ -132,3 +142,5 @@ def alertas(posicoes: pd.DataFrame, consolidado: pd.DataFrame) -> dict:
         concentrados=int(consolidado["concentrado"].sum()) if not consolidado.empty else 0,
         sem_preco=int(((posicoes["qtd_atual"] > 1e-9) & (posicoes["preco_atual"] == 0)).sum()),
     )
+
+ "corrige divisão por zero"
