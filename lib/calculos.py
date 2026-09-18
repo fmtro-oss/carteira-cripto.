@@ -142,5 +142,3 @@ def alertas(posicoes: pd.DataFrame, consolidado: pd.DataFrame) -> dict:
         concentrados=int(consolidado["concentrado"].sum()) if not consolidado.empty else 0,
         sem_preco=int(((posicoes["qtd_atual"] > 1e-9) & (posicoes["preco_atual"] == 0)).sum()),
     )
-
- "corrige divisão por zero"
