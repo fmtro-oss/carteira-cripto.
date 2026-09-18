@@ -49,6 +49,18 @@ def buscar_precos_consolidados() -> pd.DataFrame:
     kucoin_exclusivo = kucoin[~kucoin["ativo"].isin(binance["ativo"])]
     consolidado = pd.concat([binance, kucoin_exclusivo], ignore_index=True)
     consolidado["preco_usd"] = consolidado["preco_usd"].replace(0, pd.NA)
+
+    # Stablecoins não têm par contra si mesmas (não existe "USDTUSDT" pra
+    # comprar), então nunca aparecem nas APIs — fixamos em 1.0 manualmente.
+    STABLECOINS = ["USDT", "USDC", "DAI", "BUSD", "TUSD", "FDUSD", "USDE", "PYUSD"]
+    consolidado = consolidado[~consolidado["ativo"].isin(STABLECOINS)]
+    stable_rows = pd.DataFrame({
+        "ativo": STABLECOINS,
+        "preco_usd": 1.0,
+        "fonte": "Stablecoin (fixo)",
+    })
+    consolidado = pd.concat([consolidado, stable_rows], ignore_index=True)
+
     return consolidado.drop_duplicates(subset="ativo").sort_values("ativo").reset_index(drop=True)
 
 
