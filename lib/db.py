@@ -53,7 +53,7 @@ def excluir_lancamento(id_lancamento: int):
 def carregar_config() -> dict:
     sb = get_client()
     resultado = sb.table("config").select("*").execute()
-    return {row["chave"]: row["valor"] for row in resultado.data}
+    return {row["chave"]: float(row["valor"]) for row in resultado.data}
 
 
 def salvar_config(chave: str, valor: float):

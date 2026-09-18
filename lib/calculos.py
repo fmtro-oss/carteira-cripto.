@@ -14,10 +14,13 @@ TIPOS_AQUISICAO = ("Compra", "Saldo Inicial", "Recompensa")
 def _divisao_segura(numerador: pd.Series, denominador: pd.Series, offset: float = 0.0) -> pd.Series:
     """(numerador / denominador) + offset, mas devolve 0 onde o denominador é 0
     em vez de estourar ZeroDivisionError — acontece sempre que uma posição
-    está totalmente zerada (ex.: um ativo deslistado, custo_posicao = 0)."""
-    resultado = pd.Series(0.0, index=numerador.index)
+    está totalmente zerada (ex.: um ativo deslistado, custo_posicao = 0).
+    Também blinda contra números vindos do Supabase como texto/Decimal."""
+    numerador = pd.to_numeric(numerador, errors="coerce").fillna(0.0).astype("float64")
+    denominador = pd.to_numeric(denominador, errors="coerce").fillna(0.0).astype("float64")
+    resultado = pd.Series(0.0, index=numerador.index, dtype="float64")
     mask = denominador != 0
-    resultado.loc[mask] = numerador.loc[mask] / denominador.loc[mask] + offset
+    resultado.loc[mask] = (numerador.loc[mask] / denominador.loc[mask] + offset).astype("float64")
     return resultado
 
 
@@ -26,6 +29,8 @@ def calcular_posicoes(lanc: pd.DataFrame, precos: pd.DataFrame, config: dict) ->
         return pd.DataFrame()
 
     df = lanc.copy()
+    for col in ("quantidade", "preco_usd", "taxa_usd"):
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     df["valor_liquido"] = df["quantidade"] * df["preco_usd"]
     df.loc[df["tipo"].isin(TIPOS_AQUISICAO), "valor_liquido"] += df["taxa_usd"]
     df.loc[df["tipo"] == "Venda", "valor_liquido"] -= df["taxa_usd"]
@@ -49,7 +54,7 @@ def calcular_posicoes(lanc: pd.DataFrame, precos: pd.DataFrame, config: dict) ->
     g["pl_realizado"] = g["receita_venda"] - g["qtd_venda"] * g["custo_medio"]
 
     g = g.merge(precos[["ativo", "preco_usd"]], on="ativo", how="left")
-    g["preco_usd"] = g["preco_usd"].fillna(0)
+    g["preco_usd"] = pd.to_numeric(g["preco_usd"], errors="coerce").fillna(0.0)
     g = g.rename(columns={"preco_usd": "preco_atual"})
 
     g["valor_atual"] = g["qtd_atual"] * g["preco_atual"]
