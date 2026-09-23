@@ -10,21 +10,24 @@ st.set_page_config(page_title="Carteira Cripto", page_icon="💠", layout="wide"
 st.markdown("""
 <style>
 [data-testid="stMetric"] {
-    background: linear-gradient(160deg, #24123f 0%, #1a0e30 100%);
-    border: 1px solid #3a2260;
-    border-radius: 16px;
+    background: #0c0c0c;
+    border: 1px solid #262626;
+    border-left: 3px solid #39D98A;
+    border-radius: 10px;
     padding: 18px 20px 10px 20px;
 }
-[data-testid="stMetricLabel"] { opacity: 0.75; }
+[data-testid="stMetricLabel"] p { color: #b3b3b3 !important; }
+[data-testid="stMetricValue"] { color: #FAFAFA; }
 .bloco-alerta {
-    background: linear-gradient(160deg, #24123f 0%, #1a0e30 100%);
-    border: 1px solid #3a2260;
-    border-radius: 16px;
+    background: #0c0c0c;
+    border: 1px solid #262626;
+    border-left: 3px solid #39D98A;
+    border-radius: 10px;
     padding: 14px 18px;
     text-align: center;
 }
-.bloco-alerta .num { font-size: 28px; font-weight: 700; }
-.bloco-alerta .lbl { font-size: 12px; opacity: 0.75; }
+.bloco-alerta .num { font-size: 28px; font-weight: 700; color: #39D98A; }
+.bloco-alerta .lbl { font-size: 12px; color: #b3b3b3; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -94,14 +97,14 @@ por_exchange["pl_pct"] = (por_exchange["atual"] / por_exchange["custo"] - 1).whe
 g1, g2 = st.columns(2)
 with g1:
     fig = go.Figure()
-    fig.add_bar(name="Custo", x=por_exchange["exchange"], y=por_exchange["custo"], marker_color="#6b3fa0")
-    fig.add_bar(name="Valor atual", x=por_exchange["exchange"], y=por_exchange["atual"], marker_color="#a855f7")
+    fig.add_bar(name="Custo", x=por_exchange["exchange"], y=por_exchange["custo"], marker_color="#3a3a3a")
+    fig.add_bar(name="Valor atual", x=por_exchange["exchange"], y=por_exchange["atual"], marker_color="#39D98A")
     fig.update_layout(barmode="group", template="plotly_dark", height=340,
                        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                        title="Custo vs. valor atual")
     st.plotly_chart(fig, use_container_width=True)
 with g2:
-    cores = ["#f87171" if v < 0 else "#4ade80" for v in por_exchange["pl_pct"]]
+    cores = ["#f87171" if v < 0 else "#39D98A" for v in por_exchange["pl_pct"]]
     fig2 = go.Figure(go.Bar(x=por_exchange["exchange"], y=por_exchange["pl_pct"], marker_color=cores))
     fig2.update_layout(template="plotly_dark", height=340,
                         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
