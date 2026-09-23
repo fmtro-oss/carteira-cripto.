@@ -35,7 +35,7 @@ st.title("💠 Carteira Cripto")
 
 col_a, col_b = st.columns([5, 1])
 with col_b:
-    if st.button("🔄 Atualizar cotações", use_container_width=True):
+    if st.button("🔄 Atualizar cotações", width="stretch"):
         st.cache_data.clear()
         st.rerun()
 
@@ -102,14 +102,14 @@ with g1:
     fig.update_layout(barmode="group", template="plotly_dark", height=340,
                        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                        title="Custo vs. valor atual")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 with g2:
     cores = ["#f87171" if v < 0 else "#39D98A" for v in por_exchange["pl_pct"]]
     fig2 = go.Figure(go.Bar(x=por_exchange["exchange"], y=por_exchange["pl_pct"], marker_color=cores))
     fig2.update_layout(template="plotly_dark", height=340,
                         plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
                         title="P/L % por exchange", yaxis_ticksuffix="%")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, width="stretch")
 
 st.divider()
 
@@ -125,7 +125,7 @@ tabela = tabela.rename(columns={
 })
 st.dataframe(
     tabela[["Ativo", "Qtd", "Custo médio (USD)", "Custo total (USD)", "Valor atual (USD)", "P/L %", "% carteira", "Concentrado?"]],
-    use_container_width=True, hide_index=True,
+    width="stretch", hide_index=True,
     column_config={
         "Qtd": st.column_config.NumberColumn(format="%.6f"),
         "Custo médio (USD)": st.column_config.NumberColumn(format="$ %.4f"),
