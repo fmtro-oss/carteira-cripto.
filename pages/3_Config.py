@@ -27,7 +27,7 @@ with st.form("config_form"):
     aporte_kucoin = c3.number_input("Aporte total KuCoin (BRL)", value=float(cfg.get("aporte_kucoin_brl", 0)))
     cambio_kucoin = c4.number_input("Câmbio médio do aporte (KuCoin)", value=float(cfg.get("cambio_medio_kucoin", 5.5)), format="%.4f")
 
-    salvar = st.form_submit_button("Salvar parâmetros", type="primary", use_container_width=True)
+    salvar = st.form_submit_button("Salvar parâmetros", type="primary", width="stretch")
     if salvar:
         db.salvar_config("cambio_usd_brl", cambio)
         db.salvar_config("gatilho_recompra", gatilho_recompra)

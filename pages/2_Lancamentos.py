@@ -20,7 +20,7 @@ with st.form("novo_lancamento", clear_on_submit=True):
 
     observacao = st.text_input("Observação (opcional)")
 
-    enviado = st.form_submit_button("Adicionar lançamento", use_container_width=True, type="primary")
+    enviado = st.form_submit_button("Adicionar lançamento", width="stretch", type="primary")
     if enviado:
         if not ativo or quantidade <= 0:
             st.error("Preencha ao menos o ativo e uma quantidade maior que zero.")
@@ -55,7 +55,7 @@ if filtro_tipo != "Todos":
 
 st.dataframe(
     df[["data", "exchange", "ativo", "tipo", "quantidade", "preco_usd", "taxa_usd", "observacao"]],
-    use_container_width=True, hide_index=True, height=450,
+    width="stretch", hide_index=True, height=450,
     column_config={
         "quantidade": st.column_config.NumberColumn(format="%.8f"),
         "preco_usd": st.column_config.NumberColumn(format="$ %.6f"),

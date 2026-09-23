@@ -51,7 +51,7 @@ colunas = ["Ativo", "Exchange", "Qtd Atual", "Custo Médio (USD)", "Custo Posiç
 
 st.dataframe(
     df_show[colunas].style.map(cor_status, subset=["Status"]),
-    use_container_width=True, hide_index=True, height=600,
+    width="stretch", hide_index=True, height=600,
     column_config={
         "Qtd Atual": st.column_config.NumberColumn(format="%.6f"),
         "Custo Médio (USD)": st.column_config.NumberColumn(format="$ %.4f"),
